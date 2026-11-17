@@ -1,5 +1,5 @@
 name: BedrockBox
-version: 2.5.3
+version: ${project.version}
 main: ru.bedrockbox.BedrockBoxPlugin
 api-version: '1.21'
 description: Битва в бедроковой коробке (как у Аида)

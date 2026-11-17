@@ -1,4 +1,4 @@
-package ru.bedrockbox;
+package ru.bedrockbox.arena;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +10,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
+import ru.bedrockbox.BedrockBoxPlugin;
+import ru.bedrockbox.util.Log;
 
 public final class TallWorld {
    public static final String KEY = "bedrockbox:arena";
@@ -69,6 +71,7 @@ public final class TallWorld {
          world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
          world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
       } catch (Throwable t) {
+         Log.ignored(t);
       }
    }
 

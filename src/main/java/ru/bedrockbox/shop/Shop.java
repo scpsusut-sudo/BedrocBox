@@ -1,14 +1,11 @@
-package ru.bedrockbox;
+package ru.bedrockbox.shop;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Logger;
+import java.util.Map.Entry;
+import java.util.Map;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -18,7 +15,11 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.potion.PotionType;
+import org.bukkit.Registry;
+import ru.bedrockbox.game.Game;
 
 public final class Shop {
    private final String section;
@@ -128,7 +129,7 @@ public final class Shop {
       if (offer != null) {
          ItemStack itemStack = new ItemStack(offer.priceMaterial(), 1);
          if (!player.getInventory().containsAtLeast(itemStack, offer.price())) {
-            player.sendMessage("§8[§6Коробка§8] §7§cНе хватает: нужно §e" + offer.price() + " " + currencyName(offer.priceMaterial()));
+            player.sendMessage(Game.PREFIX + "§cНе хватает: нужно §e" + offer.price() + " " + currencyName(offer.priceMaterial()));
          } else {
             player.getInventory().removeItem(new ItemStack[]{new ItemStack(offer.priceMaterial(), offer.price())});
             HashMap map = player.getInventory().addItem(new ItemStack[]{offer.item().clone()});

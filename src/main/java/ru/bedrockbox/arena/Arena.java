@@ -1,18 +1,18 @@
-package ru.bedrockbox;
+package ru.bedrockbox.arena;
 
 import java.util.ArrayList;
+import java.util.function.IntConsumer;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.function.IntConsumer;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Villager;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.World;
 
 public final class Arena {
    public final World world;

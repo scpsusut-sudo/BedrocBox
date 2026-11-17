@@ -1,4 +1,4 @@
-package ru.bedrockbox;
+package ru.bedrockbox.game;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,29 +9,21 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Map.Entry;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
-import org.bukkit.GameMode;
-import org.bukkit.GameRule;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
-import org.bukkit.FireworkEffect.Type;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.type.Bed;
 import org.bukkit.block.data.type.Bed.Part;
+import org.bukkit.block.data.type.Bed;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
+import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -39,14 +31,27 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
+import org.bukkit.FireworkEffect.Type;
+import org.bukkit.FireworkEffect;
+import org.bukkit.GameMode;
+import org.bukkit.GameRule;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.Registry;
 import org.bukkit.scheduler.BukkitRunnable;
+import ru.bedrockbox.anticheat.NameHider;
+import ru.bedrockbox.arena.Arena;
+import ru.bedrockbox.BedrockBoxPlugin;
+import ru.bedrockbox.shop.Shop;
+import ru.bedrockbox.util.Log;
 
 public final class Game {
    public static final String PREFIX = "§8[§6Коробка§8] §7";
@@ -165,9 +170,9 @@ public final class Game {
       this.cinematics = fileConfiguration.getBoolean("game.cinematics", true);
       this.graceSeconds = Math.max(0, fileConfiguration.getInt("game.grace-seconds", 60));
       this.bedDestroySeconds = Math.max(0, fileConfiguration.getInt("game.bed-destroy-seconds", 0));
-      this.hasteLevel = Math.max(0, fileConfiguration.getInt("game.haste-level", 2));
+      this.hasteLevel = Math.max(0, fileConfiguration.getInt("game.haste-level", 0));
       this.fill.clear();
-      double d = Math.max(0.0, Math.min(100.0, fileConfiguration.getDouble("fill.emerald-percent", 8.0)));
+      double d = Math.max(0.0, Math.min(100.0, fileConfiguration.getDouble("fill.emerald-percent", 2.0)));
       double d2 = Math.max(0.0, Math.min(100.0, fileConfiguration.getDouble("fill.stone-percent", 30.0)));
       double d3 = 0.0;
       ConfigurationSection configurationSection = fileConfiguration.getConfigurationSection("fill.rare-ores");
@@ -299,7 +304,7 @@ public final class Game {
             this.tierWarned.put(player.getUniqueId(), l);
             String[] strings = new String[]{"", "деревянной", "каменной", "железной", "алмазной", "незеритовой"};
             player.sendMessage(
-               "§8[§6Коробка§8] §7§cЭту руду можно добыть только §f"
+               PREFIX + "§cЭту руду можно добыть только §f"
                   + strings[Math.min(5, n)]
                   + " киркой§c или лучше."
                   + (n == 3 ? " §7Железная у торговца." : "")
@@ -369,7 +374,7 @@ public final class Game {
    public void chooseTeam(Player player, String str) {
       PlayerData playerData = this.get(player);
       if (!this.teams()) {
-         player.sendMessage("§8[§6Коробка§8] §7§7Сейчас режим «каждый сам за себя». Админ: §e/bb set teamsize 2");
+         player.sendMessage(PREFIX + "§7Сейчас режим «каждый сам за себя». Админ: §e/bb set teamsize 2");
       } else if (playerData != null && (this.state == Game.State.WAITING || this.state == Game.State.STARTING)) {
          int n = Math.max(2, (int)Math.ceil((double)Math.max(this.players.size(), 2) / (double)this.teamSize));
          if (str != null) {
@@ -386,7 +391,7 @@ public final class Game {
                   }
 
                   if (n5 >= this.teamSize) {
-                     player.sendMessage("§8[§6Коробка§8] §7§cВ команде " + this.teamName(n4) + " §cуже нет мест.");
+                     player.sendMessage(PREFIX + "§cВ команде " + this.teamName(n4) + " §cуже нет мест.");
                      return;
                   }
 
@@ -396,9 +401,9 @@ public final class Game {
                }
             }
 
-            player.sendMessage("§8[§6Коробка§8] §7§cНет такой команды. Список: §e/bb team");
+            player.sendMessage(PREFIX + "§cНет такой команды. Список: §e/bb team");
          } else {
-            StringBuilder stringBuilder = new StringBuilder("§8[§6Коробка§8] §7§7Команды (по " + this.teamSize + "): ");
+            StringBuilder stringBuilder = new StringBuilder(PREFIX + "§7Команды (по " + this.teamSize + "): ");
 
             for (int n2 = 0; n2 < Math.min(n + 1, TEAM_NAMES.length); n2++) {
                int n3 = 0;
@@ -413,10 +418,10 @@ public final class Game {
             }
 
             player.sendMessage(stringBuilder.toString());
-            player.sendMessage("§8[§6Коробка§8] §7§7Выбрать: §e/bb team красные");
+            player.sendMessage(PREFIX + "§7Выбрать: §e/bb team красные");
          }
       } else {
-         player.sendMessage("§8[§6Коробка§8] §7§cКоманду можно выбрать только в очереди перед битвой.");
+         player.sendMessage(PREFIX + "§cКоманду можно выбрать только в очереди перед битвой.");
       }
    }
 
@@ -570,9 +575,9 @@ public final class Game {
          if (this.state == Game.State.WAITING || this.state == Game.State.STARTING) {
             if (this.players.size() < this.effectiveMax()) {
                this.join(player);
-               player.sendMessage("§8[§6Коробка§8] §7§7Ты в очереди. Выйти: §e/bb leave");
+               player.sendMessage(PREFIX + "§7Ты в очереди. Выйти: §e/bb leave");
             } else if (this.autoSpectate) {
-               player.sendMessage("§8[§6Коробка§8] §7§7Мест нет - подожди следующую игру.");
+               player.sendMessage(PREFIX + "§7Мест нет - подожди следующую игру.");
             }
          } else if (this.state == Game.State.RUNNING && this.autoSpectate) {
             this.spectate(player);
@@ -603,13 +608,13 @@ public final class Game {
    public void join(Player player) {
       this.optedOut.remove(player.getUniqueId());
       if (this.arena == null) {
-         player.sendMessage("§8[§6Коробка§8] §7§cАрена не настроена. Админ: §e/bb setup");
+         player.sendMessage(PREFIX + "§cАрена не настроена. Админ: §e/bb setup");
       } else if (this.inGame(player)) {
-         player.sendMessage("§8[§6Коробка§8] §7Ты уже в игре.");
+         player.sendMessage(PREFIX + "Ты уже в игре.");
       } else if (this.state != Game.State.WAITING && this.state != Game.State.STARTING) {
-         player.sendMessage("§8[§6Коробка§8] §7§cИгра уже идёт или арена восстанавливается. Подожди.");
+         player.sendMessage(PREFIX + "§cИгра уже идёт или арена восстанавливается. Подожди.");
       } else if (this.players.size() >= this.effectiveMax()) {
-         player.sendMessage("§8[§6Коробка§8] §7§cМест нет (" + this.effectiveMax() + ").");
+         player.sendMessage(PREFIX + "§cМест нет (" + this.effectiveMax() + ").");
       } else {
          this.players.put(player.getUniqueId(), new PlayerData(player.getUniqueId(), player.getName(), player.getLocation().clone()));
          this.broadcast("§e" + player.getName() + " §7зашёл в коробку §8(" + this.players.size() + "/" + this.effectiveMax() + ")");
@@ -624,7 +629,7 @@ public final class Game {
          }
 
          if (this.players.size() < this.minNeeded()) {
-            player.sendMessage("§8[§6Коробка§8] §7Нужно минимум §e" + this.minNeeded() + " §7игроков, игра начнётся сама.");
+            player.sendMessage(PREFIX + "Нужно минимум §e" + this.minNeeded() + " §7игроков, игра начнётся сама.");
          }
       }
    }
@@ -662,7 +667,7 @@ public final class Game {
       if (this.dropped.remove(player.getUniqueId())) {
          player.getInventory().clear();
          player.getInventory().setArmorContents(new ItemStack[4]);
-         player.sendMessage("§8[§6Коробка§8] §7§7Ты не успел вернуться в битву, выбыл.");
+         player.sendMessage(PREFIX + "§7Ты не успел вернуться в битву, выбыл.");
          if (this.arena != null && this.arena.isNear(player.getLocation(), 2)) {
             player.setGameMode(GameMode.SURVIVAL);
             player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
@@ -699,18 +704,18 @@ public final class Game {
       if (this.spectators.containsKey(player.getUniqueId())) {
          this.stopSpectating(player, this.spectators.remove(player.getUniqueId()));
          if (!flag) {
-            player.sendMessage("§8[§6Коробка§8] §7Ты перестал наблюдать.");
+            player.sendMessage(PREFIX + "Ты перестал наблюдать.");
          }
       } else {
          PlayerData playerData = this.players.remove(player.getUniqueId());
          if (playerData == null) {
             if (!flag) {
-               player.sendMessage("§8[§6Коробка§8] §7Ты не в игре.");
+               player.sendMessage(PREFIX + "Ты не в игре.");
             }
          } else {
             this.releaseBeds(playerData);
             if (this.state != Game.State.RUNNING && this.state != Game.State.ENDING) {
-               player.sendMessage("§8[§6Коробка§8] §7Ты вышел из очереди.");
+               player.sendMessage(PREFIX + "Ты вышел из очереди.");
             } else {
                this.restore(player, playerData);
             }
@@ -864,6 +869,7 @@ public final class Game {
          this.prevImmediateRespawn = this.arena.world.getGameRuleValue(GameRule.DO_IMMEDIATE_RESPAWN);
          this.arena.world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
       } catch (Throwable t2) {
+         Log.ignored(t2);
       }
 
       this.plugin.antiCheat().cloak().clear();
@@ -961,6 +967,7 @@ public final class Game {
             this.prevReducedDebug = this.arena.world.getGameRuleValue(GameRule.REDUCED_DEBUG_INFO);
             this.arena.world.setGameRule(GameRule.REDUCED_DEBUG_INFO, true);
          } catch (Throwable t) {
+            Log.ignored(t);
          }
       }
 
@@ -1066,7 +1073,7 @@ public final class Game {
             if (playerData.alive) {
                if (player.getGameMode() != GameMode.SURVIVAL) {
                   player.setGameMode(GameMode.SURVIVAL);
-                  player.sendMessage("§8[§6Коробка§8] §7§cПроверка: живой игрок может быть только в режиме выживания.");
+                  player.sendMessage(PREFIX + "§cПроверка: живой игрок может быть только в режиме выживания.");
                   this.warnAdmins(player.getName() + " был не в выживании - исправлено.");
                }
 
@@ -1077,7 +1084,7 @@ public final class Game {
                      player.teleport(location);
                   }
 
-                  player.sendMessage("§8[§6Коробка§8] §7§cПроверка: из коробки выходить нельзя!");
+                  player.sendMessage(PREFIX + "§cПроверка: из коробки выходить нельзя!");
                   this.warnAdmins(player.getName() + " оказался вне коробки - возвращён.");
                }
             } else {
@@ -1096,12 +1103,12 @@ public final class Game {
          if (player.getGameMode() != GameMode.SPECTATOR) {
             player.getInventory().clear();
             player.setGameMode(GameMode.SPECTATOR);
-            player.sendMessage("§8[§6Коробка§8] §7§7Ты наблюдатель - режим наблюдателя возвращён.");
+            player.sendMessage(PREFIX + "§7Ты наблюдатель - режим наблюдателя возвращён.");
          }
 
          if (!this.arena.isNear(player.getLocation(), 6)) {
             player.teleport(this.arena.center());
-            player.sendMessage("§8[§6Коробка§8] §7§7Наблюдатели не улетают дальше коробки.");
+            player.sendMessage(PREFIX + "§7Наблюдатели не улетают дальше коробки.");
          }
       }
    }
@@ -1109,7 +1116,7 @@ public final class Game {
    private void warnAdmins(String str) {
       for (Player player : Bukkit.getOnlinePlayers()) {
          if (player.hasPermission("bedrockbox.admin")) {
-            player.sendMessage("§8[§6Коробка§8] §7§8[проверка] §7" + str);
+            player.sendMessage(PREFIX + "§8[проверка] §7" + str);
          }
       }
    }
@@ -1138,12 +1145,12 @@ public final class Game {
                this.bar.addPlayer(player);
             }
 
-            player.sendMessage("§8[§6Коробка§8] §7§aТы наблюдаешь. §71-9 - к игрокам, §e/bb leave §7- выйти.");
+            player.sendMessage(PREFIX + "§aТы наблюдаешь. §71-9 - к игрокам, §e/bb leave §7- выйти.");
          } else {
-            player.sendMessage("§8[§6Коробка§8] §7Ты уже в коробке.");
+            player.sendMessage(PREFIX + "Ты уже в коробке.");
          }
       } else {
-         player.sendMessage("§8[§6Коробка§8] §7§cСейчас нечего смотреть - игра не идёт.");
+         player.sendMessage(PREFIX + "§cСейчас нечего смотреть - игра не идёт.");
       }
    }
 
@@ -1252,6 +1259,7 @@ public final class Game {
                   n = itemStack.getEnchantmentLevel(enchantment);
                }
             } catch (Throwable t) {
+               Log.ignored(t);
             }
 
             if (n > 0 && this.toolRandom.nextInt(n + 1) != 0) {
@@ -1437,6 +1445,7 @@ public final class Game {
          try {
             this.arena.world.setGameRule(GameRule.REDUCED_DEBUG_INFO, this.prevReducedDebug);
          } catch (Throwable t) {
+            Log.ignored(t);
          }
 
          this.prevReducedDebug = null;
@@ -1446,6 +1455,7 @@ public final class Game {
          try {
             this.arena.world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, this.prevImmediateRespawn);
          } catch (Throwable t2) {
+            Log.ignored(t2);
          }
 
          this.prevImmediateRespawn = null;
@@ -1766,7 +1776,7 @@ public final class Game {
          this.state = Game.State.RESETTING;
          this.arena.regenerate(this.plugin, this.fill, x -> {
             if (player != null && player.isOnline()) {
-               player.sendMessage("§8[§6Коробка§8] §7Строю коробку... §e" + x + "%");
+               player.sendMessage(PREFIX + "Строю коробку... §e" + x + "%");
             }
          }, this::afterBuild);
          this.showBuild();
@@ -1922,7 +1932,7 @@ public final class Game {
       }
 
       this.bedsGone = false;
-      Bukkit.broadcastMessage("§8[§6Коробка§8] §7§aКоробка готова к битве! §e/bb join");
+      Bukkit.broadcastMessage(PREFIX + "§aКоробка готова к битве! §e/bb join");
       if (!this.players.isEmpty()) {
          this.startCountdown(this.autoStart, false);
       }
@@ -2025,6 +2035,7 @@ public final class Game {
          try {
             player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 72000, this.hasteLevel - 1, false, false));
          } catch (Throwable t) {
+            Log.ignored(t);
          }
       }
    }
@@ -2043,6 +2054,7 @@ public final class Game {
       try {
          player.removePotionEffect(PotionEffectType.HASTE);
       } catch (Throwable t) {
+         Log.ignored(t);
       }
 
       player.setGameMode(GameMode.SURVIVAL);
@@ -2076,7 +2088,7 @@ public final class Game {
 
    public void broadcast(String str) {
       for (Player player : this.online()) {
-         player.sendMessage("§8[§6Коробка§8] §7" + str);
+         player.sendMessage(PREFIX + str);
       }
    }
 
@@ -2085,7 +2097,7 @@ public final class Game {
    }
 
    public String info() {
-      return "§8[§6Коробка§8] §7Состояние: §e"
+      return PREFIX + "Состояние: §e"
          + this.state
          + " §7| игроков: §e"
          + this.players.size()

@@ -1,18 +1,18 @@
-package ru.bedrockbox;
+package ru.bedrockbox.arena;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 

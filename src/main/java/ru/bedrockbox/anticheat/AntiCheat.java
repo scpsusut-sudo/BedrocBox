@@ -1,28 +1,30 @@
-package ru.bedrockbox;
+package ru.bedrockbox.anticheat;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.function.BiPredicate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Map.Entry;
-import java.util.function.BiPredicate;
 import org.bukkit.Bukkit;
-import org.bukkit.FluidCollisionMode;
-import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.FluidCollisionMode;
+import org.bukkit.Location;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
+import org.bukkit.World;
+import ru.bedrockbox.BedrockBoxPlugin;
+import ru.bedrockbox.util.Log;
 
 public final class AntiCheat {
    private final BedrockBoxPlugin plugin;
@@ -172,6 +174,7 @@ public final class AntiCheat {
             player.removePotionEffect(PotionEffectType.GLOWING);
          }
       } catch (Throwable t) {
+         Log.ignored(t);
       }
    }
 

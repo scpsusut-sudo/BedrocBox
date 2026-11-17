@@ -1,4 +1,4 @@
-package ru.bedrockbox;
+package ru.bedrockbox.anticheat;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -18,9 +17,11 @@ import org.bukkit.scoreboard.Criteria;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
 import org.bukkit.scoreboard.Team.Option;
 import org.bukkit.scoreboard.Team.OptionStatus;
+import org.bukkit.scoreboard.Team;
+import org.bukkit.World;
+import ru.bedrockbox.util.Log;
 
 public final class NameHider {
    public static final String TAG = "bb_nametag_hider";
@@ -160,6 +161,7 @@ public final class NameHider {
 
             this.touchedBoards.add(scoreboard);
          } catch (Throwable t) {
+            Log.ignored(t);
          }
       }
    }
@@ -200,6 +202,7 @@ public final class NameHider {
                team.removeEntry(player.getName());
             }
          } catch (Throwable t2) {
+            Log.ignored(t2);
          }
       }
 
@@ -209,6 +212,7 @@ public final class NameHider {
             team2.removeEntry(player.getName());
          }
       } catch (Throwable t) {
+         Log.ignored(t);
       }
    }
 

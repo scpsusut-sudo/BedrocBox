@@ -1,17 +1,23 @@
-package ru.bedrockbox;
+package ru.bedrockbox.command;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import ru.bedrockbox.anticheat.NameHider;
+import ru.bedrockbox.arena.Arena;
+import ru.bedrockbox.arena.Lobby;
+import ru.bedrockbox.arena.TallWorld;
+import ru.bedrockbox.BedrockBoxPlugin;
+import ru.bedrockbox.game.Game;
 
 public final class BBCommand implements CommandExecutor, TabCompleter {
    private static final String[] SUBS = new String[]{
@@ -65,7 +71,7 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
 
                tmp.leave(player8, false);
                if (tmp.isAutoJoin() && flag3) {
-                  player8.sendMessage("§8[§6Коробка§8] §7§7Автоподключение выключено до след. игры. Вернуться: §e/bb join");
+                  player8.sendMessage(Game.PREFIX + "§7Автоподключение выключено до след. игры. Вернуться: §e/bb join");
                }
             }
             break;
@@ -95,7 +101,7 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
                Player player6 = player(commandSender);
                if (player6 != null) {
                   if (tmp.whyCantRebuild() != null) {
-                     player6.sendMessage("§8[§6Коробка§8] §7" + tmp.whyCantRebuild());
+                     player6.sendMessage(Game.PREFIX + tmp.whyCantRebuild());
                   } else {
                      FileConfiguration fileConfiguration3 = this.plugin.getConfig();
                      int n = strings.length > 1 ? parse(strings[1], fileConfiguration3.getInt("arena.size", 41)) : fileConfiguration3.getInt("arena.size", 41);
@@ -110,16 +116,16 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
                      World world2 = player6.getWorld();
                      int tmp2 = maxBoxHeight(world2);
                      if (n3 > tmp2) {
-                        player6.sendMessage("§8[§6Коробка§8] §7§eВ этом мире влезает максимум §f" + tmp2 + "§e в высоту - ставлю " + tmp2 + ".");
+                        player6.sendMessage(Game.PREFIX + "§eВ этом мире влезает максимум §f" + tmp2 + "§e в высоту - ставлю " + tmp2 + ".");
                         if (n3 > 380) {
-                           player6.sendMessage("§8[§6Коробка§8] §7§7Выше 380: §e/bb tallworld");
+                           player6.sendMessage(Game.PREFIX + "§7Выше 380: §e/bb tallworld");
                         }
                      }
 
                      n3 = Math.max(15, Math.min(tmp2, n3));
                      int n2 = fitBaseY(world2, player6.getLocation().getBlockY(), n3);
                      if (n2 != player6.getLocation().getBlockY()) {
-                        player6.sendMessage("§8[§6Коробка§8] §7§7Низ коробки сдвинут на Y=§f" + n2 + "§7, чтобы влезла вся высота.");
+                        player6.sendMessage(Game.PREFIX + "§7Низ коробки сдвинут на Y=§f" + n2 + "§7, чтобы влезла вся высота.");
                      }
 
                      fileConfiguration3.set("arena.world", player6.getWorld().getName());
@@ -131,7 +137,7 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
                      this.plugin.saveConfig();
                      Arena arena2 = this.plugin.arenaFromConfig();
                      player6.sendMessage(
-                        "§8[§6Коробка§8] §7Строю коробку §e"
+                        Game.PREFIX + "Строю коробку §e"
                            + n
                            + "x"
                            + n3
@@ -143,7 +149,7 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
                      );
                      if (arena2.maxRooms() < fileConfiguration3.getInt("game.max-players", 8)) {
                         player6.sendMessage(
-                           "§8[§6Коробка§8] §7§eДля "
+                           Game.PREFIX + "§eДля "
                               + fileConfiguration3.getInt("game.max-players", 8)
                               + " игроков нужен размер §f"
                               + arena2.sizeFor(fileConfiguration3.getInt("game.max-players", 8))
@@ -163,10 +169,10 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
          case "start":
             if (checkAdmin(commandSender, flag)) {
                if (tmp.state() != Game.State.WAITING && tmp.state() != Game.State.STARTING) {
-                  commandSender.sendMessage("§8[§6Коробка§8] §7§cСейчас нельзя: " + tmp.state());
+                  commandSender.sendMessage(Game.PREFIX + "§cСейчас нельзя: " + tmp.state());
                } else {
                   tmp.forceStart();
-                  commandSender.sendMessage("§8[§6Коробка§8] §7§aПринудительный старт.");
+                  commandSender.sendMessage(Game.PREFIX + "§aПринудительный старт.");
                }
             }
             break;
@@ -175,7 +181,7 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
                Game.State state2 = tmp.state();
                tmp.end(null);
 
-               commandSender.sendMessage("§8[§6Коробка§8] §7" + switch (state2) {
+               commandSender.sendMessage(Game.PREFIX + switch (state2) {
                   case RUNNING -> "§eИгра остановлена, коробка восстанавливается.";
                   case STARTING -> "§eТаймер остановлен, очередь распущена.";
                   case RESETTING -> tmp.state() == Game.State.WAITING ? "§eЗависшая стройка сброшена." : "§7Коробка строится, подожди.";
@@ -186,12 +192,12 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
          case "reset":
             if (checkAdmin(commandSender, flag)) {
                if (tmp.whyCantRebuild() != null) {
-                  commandSender.sendMessage("§8[§6Коробка§8] §7" + tmp.whyCantRebuild());
+                  commandSender.sendMessage(Game.PREFIX + tmp.whyCantRebuild());
                } else if (tmp.state() == Game.State.STARTING) {
-                  commandSender.sendMessage("§8[§6Коробка§8] §7§cИдёт таймер лобби. /bb stop - распустить очередь");
+                  commandSender.sendMessage(Game.PREFIX + "§cИдёт таймер лобби. /bb stop - распустить очередь");
                } else {
                   tmp.resetArena(commandSender instanceof Player player5 ? player5 : null);
-                  commandSender.sendMessage("§8[§6Коробка§8] §7Перестраиваю коробку...");
+                  commandSender.sendMessage(Game.PREFIX + "Перестраиваю коробку...");
                }
             }
             break;
@@ -203,7 +209,7 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
                   this.plugin.reloadArena();
                }
 
-               commandSender.sendMessage("§8[§6Коробка§8] §7§aКонфиг перезагружен.");
+               commandSender.sendMessage(Game.PREFIX + "§aКонфиг перезагружен.");
             }
             break;
          case "set":
@@ -226,14 +232,14 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
                      this.plugin.saveConfig();
                      this.plugin.reloadSettings();
                      tmp.enforceEverywhere();
-                     commandSender.sendMessage("§8[§6Коробка§8] §7§aНики скрыты на всём сервере, всегда.");
+                     commandSender.sendMessage(Game.PREFIX + "§aНики скрыты на всём сервере, всегда.");
                      break;
                   case "show":
                      fileConfiguration2.set("game.hide-nametags-everywhere", Boolean.valueOf(false));
                      this.plugin.saveConfig();
                      this.plugin.reloadSettings();
                      tmp.showEveryone();
-                     commandSender.sendMessage("§8[§6Коробка§8] §7§eНики снова видны (кроме битвы).");
+                     commandSender.sendMessage(Game.PREFIX + "§eНики снова видны (кроме битвы).");
                      break;
                   default:
                      this.namesInfo(commandSender);
@@ -247,7 +253,7 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
                fileConfiguration.set("auto-join.enabled", Boolean.valueOf(flag2));
                this.plugin.saveConfig();
                this.plugin.reloadSettings();
-               commandSender.sendMessage("§8[§6Коробка§8] §7Автоподключение: " + (flag2 ? "§aвключено" : "§cвыключено"));
+               commandSender.sendMessage(Game.PREFIX + "Автоподключение: " + (flag2 ? "§aвключено" : "§cвыключено"));
                if (flag2) {
                   tmp.autoJoinAll();
                }
@@ -264,9 +270,9 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
             Player player3 = player(commandSender);
             if (player3 != null) {
                if (!this.plugin.lobby().enabled()) {
-                  player3.sendMessage("§8[§6Коробка§8] §7§cЛобби выключено.");
+                  player3.sendMessage(Game.PREFIX + "§cЛобби выключено.");
                } else if (tmp.inGame(player3) && tmp.state() == Game.State.RUNNING) {
-                  player3.sendMessage("§8[§6Коробка§8] §7§cСначала §e/bb leave");
+                  player3.sendMessage(Game.PREFIX + "§cСначала §e/bb leave");
                } else {
                   this.plugin.lobby().send(player3);
                }
@@ -281,12 +287,12 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
                      this.plugin.saveConfig();
                      this.plugin.reloadSettings();
                      this.plugin.lobby().follow(tmp.arena());
-                     player2.sendMessage("§8[§6Коробка§8] §7§aЛобби снова у коробки - оттуда видно, как она строится.");
+                     player2.sendMessage(Game.PREFIX + "§aЛобби снова у коробки - оттуда видно, как она строится.");
                   } else {
                      this.plugin.lobby().setHere(player2, this.plugin.getConfig());
                      this.plugin.saveConfig();
                      this.plugin.reloadSettings();
-                     player2.sendMessage("§8[§6Коробка§8] §7§aЛобби теперь здесь. Вернуть к коробке: §e/bb setlobby arena");
+                     player2.sendMessage(Game.PREFIX + "§aЛобби теперь здесь. Вернуть к коробке: §e/bb setlobby arena");
                   }
                }
             }
@@ -311,7 +317,7 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
       try {
          d = Double.parseDouble(str2.replace(',', '.'));
       } catch (NumberFormatException numberFormatException) {
-         commandSender.sendMessage("§8[§6Коробка§8] §7§cНужно число.");
+         commandSender.sendMessage(Game.PREFIX + "§cНужно число.");
          return;
       }
 
@@ -322,7 +328,7 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
          case "length":
          case "height":
             if (game2.whyCantRebuild() != null) {
-               commandSender.sendMessage("§8[§6Коробка§8] §7" + game2.whyCantRebuild());
+               commandSender.sendMessage(Game.PREFIX + game2.whyCantRebuild());
                return;
             }
 
@@ -331,9 +337,9 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
             int tmp = arena4 == null ? 4000 : maxBoxHeight(arena4.world);
             int n3 = flag ? clamp(n, 21, 255) : clamp(n, 15, tmp);
             if (n3 != n) {
-               commandSender.sendMessage("§8[§6Коробка§8] §7§7Допустимо: " + (flag ? "21..255" : "15.." + tmp) + " - ставлю §e" + n3);
+               commandSender.sendMessage(Game.PREFIX + "§7Допустимо: " + (flag ? "21..255" : "15.." + tmp) + " - ставлю §e" + n3);
                if (!flag && n > tmp) {
-                  commandSender.sendMessage("§8[§6Коробка§8] §7§7Выше нельзя, нужен §e/bb tallworld");
+                  commandSender.sendMessage(Game.PREFIX + "§7Выше нельзя, нужен §e/bb tallworld");
                }
             }
 
@@ -341,7 +347,7 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
                int n4 = fitBaseY(arena4.world, fileConfiguration.getInt("arena.y"), n3);
                if (n4 != fileConfiguration.getInt("arena.y")) {
                   fileConfiguration.set("arena.y", Integer.valueOf(n4));
-                  commandSender.sendMessage("§8[§6Коробка§8] §7§7Низ коробки сдвинут на Y=§f" + n4 + "§7, чтобы влезла вся высота.");
+                  commandSender.sendMessage(Game.PREFIX + "§7Низ коробки сдвинут на Y=§f" + n4 + "§7, чтобы влезла вся высота.");
                }
             }
 
@@ -389,13 +395,13 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
 
             this.plugin.saveConfig();
             if (arena4 == null) {
-               commandSender.sendMessage("§8[§6Коробка§8] §7Сохранено: §e" + str3 + " = " + n3 + " §7(построй коробку: /bb setup)");
+               commandSender.sendMessage(Game.PREFIX + "Сохранено: §e" + str3 + " = " + n3 + " §7(построй коробку: /bb setup)");
                return;
             }
 
             Arena arena3 = this.plugin.arenaFromConfig();
             commandSender.sendMessage(
-               "§8[§6Коробка§8] §7"
+               Game.PREFIX + ""
                   + str3
                   + " -> §e"
                   + n3
@@ -418,7 +424,7 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
             Arena arena2 = game2.arena();
             if (arena2 != null && arena2.maxRooms() < n7) {
                commandSender.sendMessage(
-                  "§8[§6Коробка§8] §7§eВ коробку сейчас влезает только §f"
+                  Game.PREFIX + "§eВ коробку сейчас влезает только §f"
                      + arena2.maxRooms()
                      + " §eкомнат. Для "
                      + n7
@@ -436,7 +442,7 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
             double d3 = Math.max(0.0, Math.min(100.0, d));
             fileConfiguration.set("fill.emerald-percent", Double.valueOf(d3));
             this.save(commandSender, "Изумрудной руды", d3 + "%");
-            commandSender.sendMessage("§8[§6Коробка§8] §7§7Применится после перестройки: §e/bb reset");
+            commandSender.sendMessage(Game.PREFIX + "§7Применится после перестройки: §e/bb reset");
             break;
          case "grace":
             fileConfiguration.set("game.grace-seconds", Integer.valueOf(clamp(n, 0, 3600)));
@@ -455,7 +461,7 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
             double d2 = Math.max(0.0, Math.min(100.0, d));
             fileConfiguration.set("fill.rare-ores.DIAMOND_ORE", Double.valueOf(d2));
             this.save(commandSender, "Алмазной руды", d2 + "%");
-            commandSender.sendMessage("§8[§6Коробка§8] §7§7Применится после перестройки: §e/bb reset");
+            commandSender.sendMessage(Game.PREFIX + "§7Применится после перестройки: §e/bb reset");
             break;
          case "autostart":
             int n2 = clamp(n, 5, 3600);
@@ -474,7 +480,7 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
    private void save(CommandSender commandSender, String str, String str2) {
       this.plugin.saveConfig();
       this.plugin.reloadSettings();
-      commandSender.sendMessage("§8[§6Коробка§8] §7" + str + " -> §e" + str2);
+      commandSender.sendMessage(Game.PREFIX + str + " -> §e" + str2);
    }
 
    private void showSettings(CommandSender commandSender) {
@@ -492,13 +498,13 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
             + (arena2 != null ? " §8| влезает комнат: " + arena2.maxRooms() : "")
       );
       commandSender.sendMessage("§e/bb set minplayers §f" + fileConfiguration.getInt("game.min-players", 2) + " §7- сколько нужно для старта");
-      commandSender.sendMessage("§e/bb set emeralds §f" + fileConfiguration.getDouble("fill.emerald-percent", 8.0) + "% §7- изумрудной руды");
+      commandSender.sendMessage("§e/bb set emeralds §f" + fileConfiguration.getDouble("fill.emerald-percent", 2.0) + "% §7- изумрудной руды");
       commandSender.sendMessage("§e/bb set teamsize §f" + fileConfiguration.getInt("game.team-size", 1) + " §7- игроков в команде (1 = каждый сам за себя)");
       commandSender.sendMessage("§e/bb set autostart §f" + fileConfiguration.getInt("game.auto-start-seconds", 120) + " §7- игра стартует сама через, сек");
-      commandSender.sendMessage("§e/bb set diamonds §f" + fileConfiguration.getDouble("fill.rare-ores.DIAMOND_ORE", 0.4) + "% §7- редкой алмазной руды");
+      commandSender.sendMessage("§e/bb set diamonds §f" + fileConfiguration.getDouble("fill.rare-ores.DIAMOND_ORE", 0.1) + "% §7- редкой алмазной руды");
       commandSender.sendMessage("§e/bb set grace §f" + fileConfiguration.getInt("game.grace-seconds", 60) + " §7- мирное время, сек");
-      commandSender.sendMessage("§e/bb set beds §f" + fileConfiguration.getInt("game.bed-destroy-seconds", 600) + " §7- когда исчезнут кровати, сек");
-      commandSender.sendMessage("§e/bb set haste §f" + fileConfiguration.getInt("game.haste-level", 2) + " §7- уровень спешки");
+      commandSender.sendMessage("§e/bb set beds §f" + fileConfiguration.getInt("game.bed-destroy-seconds", 0) + " §7- когда исчезнут кровати, сек");
+      commandSender.sendMessage("§e/bb set haste §f" + fileConfiguration.getInt("game.haste-level", 0) + " §7- уровень спешки");
    }
 
    private static int clamp(int n, int n2, int n3) {
@@ -523,26 +529,26 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
          Player player2 = player(commandSender);
          if (player2 != null) {
             if (world2 == null) {
-               commandSender.sendMessage("§8[§6Коробка§8] §7§cВысокого мира ещё нет. Сначала §e/bb tallworld§c и перезапуск сервера.");
+               commandSender.sendMessage(Game.PREFIX + "§cВысокого мира ещё нет. Сначала §e/bb tallworld§c и перезапуск сервера.");
             } else {
                player2.teleport(TallWorld.platform(world2, 0, 0));
-               commandSender.sendMessage("§8[§6Коробка§8] §7§aТы в высоком мире (Y от " + world2.getMinHeight() + " до " + world2.getMaxHeight() + ").");
-               commandSender.sendMessage("§8[§6Коробка§8] §7§7Теперь: §e/bb setup 41 999 §7- коробка 41x999x41.");
+               commandSender.sendMessage(Game.PREFIX + "§aТы в высоком мире (Y от " + world2.getMinHeight() + " до " + world2.getMaxHeight() + ").");
+               commandSender.sendMessage(Game.PREFIX + "§7Теперь: §e/bb setup 41 999 §7- коробка 41x999x41.");
             }
          }
       } else if (world2 != null) {
-         commandSender.sendMessage("§8[§6Коробка§8] §7§aВысокий мир готов: §f" + world2.getName() + " §7(высота " + (world2.getMaxHeight() - world2.getMinHeight()) + ")");
-         commandSender.sendMessage("§8[§6Коробка§8] §7§e/bb tallworld tp §7- перейти туда, потом §e/bb setup 41 999");
+         commandSender.sendMessage(Game.PREFIX + "§aВысокий мир готов: §f" + world2.getName() + " §7(высота " + (world2.getMaxHeight() - world2.getMinHeight()) + ")");
+         commandSender.sendMessage(Game.PREFIX + "§e/bb tallworld tp §7- перейти туда, потом §e/bb setup 41 999");
       } else if (tallWorld2.installed()) {
-         commandSender.sendMessage("§8[§6Коробка§8] §7§eДатапак уже стоит, нужен полный рестарт (не /reload).");
-         commandSender.sendMessage("§8[§6Коробка§8] §7§7Мира нет после рестарта - кинь консоль.");
+         commandSender.sendMessage(Game.PREFIX + "§eДатапак уже стоит, нужен полный рестарт (не /reload).");
+         commandSender.sendMessage(Game.PREFIX + "§7Мира нет после рестарта - кинь консоль.");
       } else {
          try {
             tallWorld2.install();
-            commandSender.sendMessage("§8[§6Коробка§8] §7§aДатапак высокого мира установлен.");
-            commandSender.sendMessage("§8[§6Коробка§8] §7§eПерезапусти сервер, потом §f/bb tallworld tp §eи §f/bb setup 41 999");
+            commandSender.sendMessage(Game.PREFIX + "§aДатапак высокого мира установлен.");
+            commandSender.sendMessage(Game.PREFIX + "§eПерезапусти сервер, потом §f/bb tallworld tp §eи §f/bb setup 41 999");
          } catch (Exception e2) {
-            commandSender.sendMessage("§8[§6Коробка§8] §7§cНе получилось записать датапак: " + e2.getMessage());
+            commandSender.sendMessage(Game.PREFIX + "§cНе получилось записать датапак: " + e2.getMessage());
          }
       }
    }
@@ -606,7 +612,7 @@ public final class BBCommand implements CommandExecutor, TabCompleter {
 
    private static boolean checkAdmin(CommandSender commandSender, boolean flag) {
       if (!flag) {
-         commandSender.sendMessage("§8[§6Коробка§8] §7§cНет прав.");
+         commandSender.sendMessage(Game.PREFIX + "§cНет прав.");
       }
 
       return flag;

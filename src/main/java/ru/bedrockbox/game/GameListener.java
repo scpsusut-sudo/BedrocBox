@@ -1,22 +1,16 @@
-package ru.bedrockbox;
+package ru.bedrockbox.game;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.Bed;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.TNTPrimed;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
@@ -24,14 +18,17 @@ import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -41,8 +38,15 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.GameMode;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import ru.bedrockbox.arena.Arena;
+import ru.bedrockbox.BedrockBoxPlugin;
+import ru.bedrockbox.shop.CustomItems;
+import ru.bedrockbox.shop.Shop;
 
 public final class GameListener implements Listener {
    private final BedrockBoxPlugin plugin;
@@ -74,7 +78,7 @@ public final class GameListener implements Listener {
                blockBreakEvent.setCancelled(true);
             } else if (game2.sameTeam(bedRecord.owner, player.getUniqueId())) {
                blockBreakEvent.setCancelled(true);
-               player.sendMessage("§8[§6Коробка§8] §7§cСвою кровать ломать нельзя!");
+               player.sendMessage(Game.PREFIX + "§cСвою кровать ломать нельзя!");
             } else {
                blockBreakEvent.setDropItems(false);
                game2.removeBed(bedRecord, player.getName(), block, false);
@@ -127,7 +131,7 @@ public final class GameListener implements Listener {
                if (block.getBlockData() instanceof Bed bed) {
                   if (game2.bedsGone()) {
                      blockPlaceEvent.setCancelled(true);
-                     blockPlaceEvent.getPlayer().sendMessage("§8[§6Коробка§8] §7§cКровати больше ставить нельзя!");
+                     blockPlaceEvent.getPlayer().sendMessage(Game.PREFIX + "§cКровати больше ставить нельзя!");
                      return;
                   }
 
@@ -138,7 +142,7 @@ public final class GameListener implements Listener {
                   }
 
                   game2.registerBed(playerData, block, block2, block.getLocation().add(0.5, 0.6, 0.5));
-                  blockPlaceEvent.getPlayer().sendMessage("§8[§6Коробка§8] §7§aЗапасная кровать стоит.");
+                  blockPlaceEvent.getPlayer().sendMessage(Game.PREFIX + "§aЗапасная кровать стоит.");
                }
             } else {
                blockPlaceEvent.setCancelled(true);
@@ -228,7 +232,7 @@ public final class GameListener implements Listener {
       }
       if (attacker != target && game.inGame(target) && game.inGame(attacker) && game.isGrace()) {
          e.setCancelled(true);
-         attacker.sendMessage("§8[§6Коробка§8] §7§eМирное время, PvP пока выключено.");
+         attacker.sendMessage(Game.PREFIX + "§eМирное время, PvP пока выключено.");
          return;
       }
       if (damager instanceof Player && game.inGame(attacker) && game.state() == Game.State.RUNNING
@@ -397,7 +401,7 @@ public final class GameListener implements Listener {
 
                player.playSound(player.getLocation(), "entity.villager.trade", 1.0F, 1.0F);
             } else {
-               player.sendMessage("§8[§6Коробка§8] §7§7Торговец торгует только с участниками битвы.");
+               player.sendMessage(Game.PREFIX + "§7Торговец торгует только с участниками битвы.");
             }
          }
       }
@@ -427,7 +431,7 @@ public final class GameListener implements Listener {
          String str = playerCommandPreprocessEvent.getMessage().toLowerCase();
          if (!str.startsWith("/bb ") && !str.equals("/bb") && !str.startsWith("/bedrockbox") && !str.startsWith("/korobka")) {
             playerCommandPreprocessEvent.setCancelled(true);
-            player.sendMessage("§8[§6Коробка§8] §7§cНаблюдатели не могут использовать команды. §7Выйти: §e/bb leave");
+            player.sendMessage(Game.PREFIX + "§cНаблюдатели не могут использовать команды. §7Выйти: §e/bb leave");
          }
       }
    }

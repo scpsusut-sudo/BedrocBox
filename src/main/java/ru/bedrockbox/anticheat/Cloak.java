@@ -1,26 +1,26 @@
-package ru.bedrockbox;
+package ru.bedrockbox.anticheat;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.function.BiPredicate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Map.Entry;
-import java.util.function.BiPredicate;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.World;
 
 public final class Cloak {
    private final List<Cloak.Zone> zones = new ArrayList<>();

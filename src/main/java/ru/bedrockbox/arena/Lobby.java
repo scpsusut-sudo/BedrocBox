@@ -1,15 +1,17 @@
-package ru.bedrockbox;
+package ru.bedrockbox.arena;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
+import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.generator.ChunkGenerator;
+import ru.bedrockbox.BedrockBoxPlugin;
+import ru.bedrockbox.util.Log;
 
 public final class Lobby {
    private static final int WORLD_Y = 100;
@@ -126,6 +128,7 @@ public final class Lobby {
          world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
          world.setTime(6000L);
       } catch (Throwable t) {
+         Log.ignored(t);
       }
    }
 

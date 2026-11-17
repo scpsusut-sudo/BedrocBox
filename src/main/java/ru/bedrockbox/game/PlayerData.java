@@ -1,10 +1,10 @@
-package ru.bedrockbox;
+package ru.bedrockbox.game;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.Location;
 
 public final class PlayerData {
    public final UUID id;

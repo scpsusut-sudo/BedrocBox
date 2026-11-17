@@ -1,10 +1,11 @@
-package ru.bedrockbox;
+package ru.bedrockbox.anticheat;
 
 import io.papermc.paper.event.packet.PlayerChunkLoadEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import ru.bedrockbox.BedrockBoxPlugin;
 
 public final class ChunkListener implements Listener {
    private final BedrockBoxPlugin plugin;

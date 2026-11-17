@@ -1,20 +1,23 @@
-package ru.bedrockbox;
+package ru.bedrockbox.shop;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
+import ru.bedrockbox.BedrockBoxPlugin;
+import ru.bedrockbox.game.Game;
+import ru.bedrockbox.game.PlayerData;
 
 public final class CustomItems {
    public static final String DRILL = "drill";
@@ -76,7 +79,7 @@ public final class CustomItems {
          switch (str) {
             case "throw_tnt":
                if (game.isGrace()) {
-                  player2.sendMessage("§8[§6Коробка§8] §7§eВ мирное время динамит не бросить.");
+                  player2.sendMessage(Game.PREFIX + "§eВ мирное время динамит не бросить.");
                   return true;
                }
 
@@ -91,18 +94,18 @@ public final class CustomItems {
             case "tracker":
                PlayerData.BedRecord bedRecord = game.nearestEnemyBed(player2);
                if (bedRecord == null) {
-                  player2.sendMessage("§8[§6Коробка§8] §7§7Чужих кроватей не осталось.");
+                  player2.sendMessage(Game.PREFIX + "§7Чужих кроватей не осталось.");
                   return true;
                }
 
                player2.setCompassTarget(bedRecord.foot.getLocation());
-               player2.sendMessage("§8[§6Коробка§8] §7§eСтрелка ведёт к чужой кровати.");
+               player2.sendMessage(Game.PREFIX + "§eСтрелка ведёт к чужой кровати.");
                break;
             case "jump_feather":
                long tmp = System.currentTimeMillis();
                Long l = this.featherCooldown.get(player2.getUniqueId());
                if (l != null && l > tmp) {
-                  player2.sendMessage("§8[§6Коробка§8] §7§7Перо перезаряжается: §e" + ((l - tmp) / 1000L + 1L) + " сек");
+                  player2.sendMessage(Game.PREFIX + "§7Перо перезаряжается: §e" + ((l - tmp) / 1000L + 1L) + " сек");
                   return true;
                }
 
@@ -115,7 +118,7 @@ public final class CustomItems {
                break;
             case "medkit":
                if (player2.getHealth() >= 20.0) {
-                  player2.sendMessage("§8[§6Коробка§8] §7§7Ты и так здоров.");
+                  player2.sendMessage(Game.PREFIX + "§7Ты и так здоров.");
                   return true;
                }
 

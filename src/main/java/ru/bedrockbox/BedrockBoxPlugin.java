@@ -4,14 +4,25 @@ import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.World;
+import ru.bedrockbox.anticheat.AntiCheat;
+import ru.bedrockbox.anticheat.ChunkListener;
+import ru.bedrockbox.arena.Arena;
+import ru.bedrockbox.arena.Cinematic;
+import ru.bedrockbox.arena.Lobby;
+import ru.bedrockbox.arena.TallWorld;
+import ru.bedrockbox.command.BBCommand;
+import ru.bedrockbox.game.Game;
+import ru.bedrockbox.game.GameListener;
+import ru.bedrockbox.shop.CustomItems;
+import ru.bedrockbox.shop.Shop;
 
 public final class BedrockBoxPlugin extends JavaPlugin {
    private Game game;
@@ -197,7 +208,7 @@ public final class BedrockBoxPlugin extends JavaPlugin {
          this.saveConfig();
          Arena arena3 = new Arena(world2, 0, n3, 0, n, arenaLength(fileConfiguration), n2);
          arena3.setSpawnRandomness(fileConfiguration.getDouble("game.spawn-randomness", 0.15));
-         String str = "§8[§6Коробка§8] §7§eКоробка задевала лобби - перенёс её в отдельный мир §fbb_arena§e, чтобы стройка не сносила площадку.";
+         String str = Game.PREFIX + "§eКоробка задевала лобби - перенёс её в отдельный мир §fbb_arena§e, чтобы стройка не сносила площадку.";
          this.getLogger().info("Коробка задевала лобби - перенесена в мир bb_arena.");
          if (player != null && player.isOnline()) {
             player.sendMessage(str);
