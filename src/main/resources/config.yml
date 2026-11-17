@@ -1,0 +1,176 @@
+# BedrockBox - битва в бедроковой коробке
+# Почти всё меняется прямо в игре: /bb set
+
+# не трогай, по нему плагин обновляет старый конфиг (старый сохраняется в config-old.yml)
+config-version: 16
+
+# Заполняется командой /bb setup (встань туда, где будет низ центра коробки)
+arena:
+  world: ''
+  x: 0
+  y: 0
+  z: 0
+  size: 41  # ширина (по X): 21..255   /bb set width   (/bb set size - ширина и длина сразу)
+  length: 0  # длина (по Z): 21..255, 0 = как ширина   /bb set length
+  height: 31  # высота внутри коробки: до предела мира (обычный мир ~370). Для 999: /bb tallworld   /bb set height
+
+game:
+  min-players: 2  # /bb set minplayers
+  max-players: 8  # до 16. /bb set maxplayers (плагин подскажет нужный размер коробки)
+  auto-start-seconds: 120  # игра начинается сама через N сек после входа первого игрока   /bb set autostart
+  countdown: 10  # до скольких сек сокращается таймер, когда все места заняты
+  spawn-randomness: 0.15  # 0 = строго самые дальние точки (предсказуемо); 0.15 = почти самые дальние, но в разных местах. Базы всегда на разных уровнях
+  cinematics: true  # пролёты камеры: стройка коробки, старт битвы, победа
+  team-size: 1  # игроков в команде: 1 = каждый сам за себя, 2..8 = команды   /bb set teamsize
+  rejoin-seconds: 120  # вылетел посреди битвы - столько секунд на перезаход (вещи и кровать сохраняются). 0 = сразу выбывает
+  hide-nametags: true  # прятать ники игроков во время битвы
+  hide-nametags-everywhere: false  # прятать ники всем и всегда   /bb names hide
+  hide-coordinates: true  # во время битвы F3 не показывает координаты
+  grace-seconds: 60  # мирное время, сек             /bb set grace
+  bed-destroy-seconds: 0  # через сколько исчезнут кровати (0 = никогда, их можно только сломать)  /bb set beds
+  haste-level: 0  # эффект «Спешка» для быстрой копки (0 = выкл)   /bb set haste
+
+# Лобби: при входе на сервер и после каждой игры всех переносит сюда (режим приключения,
+# без урона и голода, ничего не сломать). По умолчанию плагин сам создаёт пустой мир bb_lobby
+# с площадкой. Своё лобби в любом месте: встань туда и /bb setlobby
+lobby:
+  enabled: true
+  mode: arena  # arena - площадка сбоку от коробки, видно как она строится; world - отдельный мир bb_lobby
+                # своё место: встань туда и /bb setlobby; вернуть к коробке: /bb setlobby arena
+
+# Все игроки на сервере сами попадают в очередь. Если битва уже идёт - становятся зрителями.
+# Не трогает: игроков в креативе и с правом bedrockbox.bypass. /bb leave - выйти до следующей игры.
+auto-join:
+  enabled: true  # /bb autojoin on|off
+  world: ''  # только из этого мира, если лобби выключено. Пусто = из любого
+  spectate-running: true  # если битва уже идёт - смотреть её
+
+# В коробке: булыжник, камень, изумрудная руда и очень редкая руда.
+fill:
+  emerald-percent: 2  # сколько изумрудной руды, %    /bb set emeralds
+  stone-percent: 30  # используется, только если список blocks ниже пустой
+  blocks:  # из чего состоит коробка (веса). Всё копается и даёт булыжник-валюту
+    COBBLESTONE: 30
+    STONE: 14
+    DEEPSLATE: 10
+    ANDESITE: 8
+    DIORITE: 8
+    GRANITE: 8
+    TUFF: 7
+    CALCITE: 3
+    DIRT: 5
+    COARSE_DIRT: 2
+    GRAVEL: 3  # падает, если подкопать снизу - осторожно
+    MOSS_BLOCK: 2
+  any-pickaxe: true  # обычные блоки копаются любой киркой
+  min-pickaxe:  # какая кирка нужна минимум (иначе блок не ломается)
+    EMERALD_ORE: IRON_PICKAXE
+    DIAMOND_ORE: IRON_PICKAXE
+  rare-ores:  # очень редкая руда, % от всех блоков
+    DIAMOND_ORE: 0.1  # /bb set diamonds
+
+drops:
+  EMERALD_ORE: EMERALD
+  DIAMOND_ORE: DIAMOND
+  STONE: COBBLESTONE
+
+# Магазин торговца (54 слота). Валюта: булыжник, изумруды и редкие алмазы.
+# Имбовые вещи продаёт только тайный торговец (см. secret-shop внизу). Запасная кровать - 64.
+# Цена больше 64 - можно, берётся из нескольких стаков.
+# Баланс под игру минут на 15-20. Доход одного игрока: булыжник 35/мин (дерево) - 54/мин (камень),
+# изумруды ~3.5/мин, алмазы ~0.18/мин (с железной киркой). Изумруды и алмазы - только железной киркой и лучше.
+# custom: - особые предметы плагина: drill, throw_tnt, tracker, jump_feather, medkit
+shop:
+  # --- за редкие алмазы (верхний ряд) ---
+  totem:           { slot: 2, material: TOTEM_OF_UNDYING,       price: { material: DIAMOND, amount: 3 } }
+  notch_apple:     { slot: 3, material: ENCHANTED_GOLDEN_APPLE, price: { material: DIAMOND, amount: 3 } }
+  netherite_chest: { slot: 4, material: NETHERITE_CHESTPLATE,   price: { material: DIAMOND, amount: 5 } }
+  netherite_helm:  { slot: 5, material: NETHERITE_HELMET,       price: { material: DIAMOND, amount: 3 } }
+  pearls:          { slot: 6, material: ENDER_PEARL, amount: 4, price: { material: DIAMOND, amount: 1 } }
+
+  # --- кирки ---
+  stone_pickaxe:   { slot: 10, material: STONE_PICKAXE,   price: { material: COBBLESTONE, amount: 24 } }
+  iron_pickaxe:    { slot: 11, material: IRON_PICKAXE,    price: { material: COBBLESTONE, amount: 96 } }
+  diamond_pickaxe: { slot: 12, material: DIAMOND_PICKAXE, price: { material: EMERALD, amount: 20 } }
+
+  # --- оружие ---
+  stone_sword:     { slot: 19, material: STONE_SWORD,   price: { material: COBBLESTONE, amount: 48 } }
+  iron_sword:      { slot: 20, material: IRON_SWORD,    price: { material: EMERALD, amount: 6 } }
+  diamond_sword:   { slot: 21, material: DIAMOND_SWORD, price: { material: EMERALD, amount: 24 } }
+  bow:             { slot: 23, material: BOW,    price: { material: EMERALD, amount: 8 } }
+  arrows:          { slot: 24, material: ARROW, amount: 8, price: { material: COBBLESTONE, amount: 32 } }
+  shield:          { slot: 25, material: SHIELD, price: { material: EMERALD, amount: 5 } }
+
+  # --- броня ---
+  iron_helmet:        { slot: 28, material: IRON_HELMET,        price: { material: EMERALD, amount: 5 } }
+  iron_chestplate:    { slot: 29, material: IRON_CHESTPLATE,    price: { material: EMERALD, amount: 8 } }
+  iron_leggings:      { slot: 30, material: IRON_LEGGINGS,      price: { material: EMERALD, amount: 7 } }
+  iron_boots:         { slot: 31, material: IRON_BOOTS,         price: { material: EMERALD, amount: 4 } }
+  diamond_helmet:     { slot: 32, material: DIAMOND_HELMET,     price: { material: EMERALD, amount: 18 } }
+  diamond_chestplate: { slot: 33, material: DIAMOND_CHESTPLATE, price: { material: EMERALD, amount: 30 } }
+  diamond_leggings:   { slot: 34, material: DIAMOND_LEGGINGS,   price: { material: EMERALD, amount: 26 } }
+
+  # --- разное ---
+  tnt:             { slot: 37, material: TNT,             price: { material: EMERALD, amount: 5 } }
+  flint_and_steel: { slot: 38, material: FLINT_AND_STEEL, price: { material: EMERALD, amount: 2 } }
+  golden_apple:    { slot: 39, material: GOLDEN_APPLE,    price: { material: EMERALD, amount: 10 } }
+  ender_pearl:     { slot: 40, material: ENDER_PEARL,     price: { material: EMERALD, amount: 8 } }
+  torches:         { slot: 41, material: TORCH, amount: 16, price: { material: COBBLESTONE, amount: 16 } }
+  ladder:          { slot: 42, material: LADDER, amount: 8, price: { material: COBBLESTONE, amount: 16 } }
+  reserve_bed:
+    slot: 43
+    material: WHITE_BED
+    name: '§f§lЗапасная кровать'
+    price: { material: EMERALD, amount: 40 }
+
+  # --- зелья ---
+  invisibility:
+    slot: 14
+    material: POTION
+    potion: INVISIBILITY  # 3 минуты. LONG_INVISIBILITY - 8 минут
+    name: '§7§lЗелье невидимости'
+    price: { material: EMERALD, amount: 30 }
+
+  # --- особые предметы ---
+  throw_tnt:   { slot: 46, custom: throw_tnt, amount: 2, price: { material: EMERALD, amount: 12 } }
+  tracker:     { slot: 47, custom: tracker,      price: { material: EMERALD, amount: 16 } }
+  feather:     { slot: 48, custom: jump_feather, price: { material: EMERALD, amount: 6 } }
+  medkit:      { slot: 49, custom: medkit,       price: { material: EMERALD, amount: 5 } }
+  bread:       { slot: 50, material: BREAD, amount: 4, price: { material: COBBLESTONE, amount: 8 } }
+  cobweb:      { slot: 51, material: COBWEB, amount: 2, price: { material: EMERALD, amount: 3 } }
+  water:       { slot: 52, material: WATER_BUCKET, price: { material: EMERALD, amount: 3 } }
+
+# Тайный торговец
+# Спрятан в камне как можно дальше от всех баз. Без имени, координаты нигде не пишутся.
+# Тайник - пустота 3x3 со стенками из замшелого булыжника, без света.
+secret-trader:
+  count: 1  # сколько тайных торговцев на карте (0 = нет)
+
+secret-shop:
+  god_sword:
+    slot: 11
+    material: NETHERITE_SWORD
+    name: '§6§lМеч бога'
+    enchants: { sharpness: 10, unbreaking: 5 }
+    price: { material: EMERALD, amount: 80 }
+  super_pickaxe:
+    slot: 13
+    material: NETHERITE_PICKAXE
+    name: '§d§lСупер-кирка'
+    enchants: { efficiency: 10, unbreaking: 5 }
+    price: { material: EMERALD, amount: 64 }
+  drill:
+    slot: 15
+    custom: drill
+    price: { material: EMERALD, amount: 64 }
+
+# Античит
+anticheat:
+  anti-esp: true  # игроки и тайный торговец не видны клиенту за стенами (ESP ничего не покажет)
+  anti-esp-distance: 4  # ближе этого - видно всегда (чтобы не мигали в упор)
+  anti-tracer-distance: 40  # дальше этого игроки не отправляются клиенту вообще - трейсерам не к кому тянуть линию
+  anti-freecam: true  # чужие базы и тайник - сплошной камень, пока сам не подошёл (фрикам видит только камень)
+  anti-freecam-distance: 10  # с какого расстояния база показывается по-настоящему
+  hit-check: true  # нельзя бить сквозь стены и дальше max-reach (киллаура, длинные руки)
+  max-reach: 4.8
+  anti-xray: true  # плагин включает анти-X-ray Paper в мире арены (нужен перезапуск сервера)

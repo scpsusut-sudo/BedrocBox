@@ -1,0 +1,17 @@
+name: BedrockBox
+version: 2.5.3
+main: ru.bedrockbox.BedrockBoxPlugin
+api-version: '1.21'
+description: Битва в бедроковой коробке (как у Аида)
+commands:
+  bb:
+    description: Битва в бедроковой коробке
+    usage: /bb help
+    aliases: [bedrockbox, korobka]
+permissions:
+  bedrockbox.admin:
+    description: Настройка арены, старт и стоп игры
+    default: op
+  bedrockbox.bypass:
+    description: Не подключаться к игре автоматически
+    default: false
